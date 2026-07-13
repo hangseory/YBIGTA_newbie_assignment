@@ -1,0 +1,99 @@
+from dataclasses import dataclass, field
+from typing import TypeVar, Generic, Optional, Iterable
+
+
+"""
+TODO:
+- Trie.push 구현하기
+- (필요할 경우) Trie에 추가 method 구현하기
+"""
+
+
+T = TypeVar("T")
+
+
+@dataclass
+class TrieNode(Generic[T]):
+    body: Optional[T] = None
+    children: list[int] = field(default_factory=lambda: [])
+    is_end: bool = False
+
+
+class Trie(list[TrieNode[T]]):
+    def __init__(self) -> None:
+        super().__init__()
+        self.append(TrieNode(body=None))
+
+    def push(self, seq: Iterable[T]) -> None:
+        """
+        seq: T의 열 (list[int]일 수도 있고 str일 수도 있고 등등...)
+
+        action: trie에 seq을 저장하기
+        """
+        # 구현하세요!
+        cur : int = 0 
+
+        for cur_char in seq : 
+            exist : int = 0
+            for child_idx in self[cur].children :
+                if self[child_idx].body == cur_char :
+                    cur = child_idx
+                    exist = 1
+                    break 
+            
+            if exist == 0 :
+                self.append(TrieNode(body=cur_char))
+
+                new_idx = len(self) -1 
+                self[cur].children.append(new_idx)
+
+                cur = new_idx
+        
+        self[cur].is_end = True
+
+
+
+    # 구현하세요!
+
+
+import sys
+
+
+"""
+TODO:
+- 일단 lib.py의 Trie Class부터 구현하기
+- main 구현하기
+
+힌트: 한 글자짜리 자료에도 그냥 str을 쓰기에는 메모리가 아깝다...
+"""
+
+def main() -> None:
+    # 구현하세요!
+    MOD = 1_000_000_007
+    n = int(input())
+
+    trie: Trie[int] = Trie()
+
+    for _ in range(n):
+        name = input().strip()
+        trie.push(map(ord, name))
+
+    answer = 1
+
+    for node in trie:
+        group_count = len(node.children)
+
+        if node.is_end:
+            group_count += 1
+
+        factorial_value = 1
+
+        for i in range(2, group_count + 1):
+            factorial_value = factorial_value * i % MOD
+
+        answer = answer * factorial_value % MOD
+
+    print(answer)
+
+if __name__ == "__main__":
+    main()
